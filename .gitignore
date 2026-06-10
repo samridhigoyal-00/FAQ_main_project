@@ -1,0 +1,27 @@
+# Root Gitignore for FAQ Project
+
+# Node dependencies
+backend/node_modules/
+frontend/node_modules/
+
+# Production build outputs
+frontend/build/
+
+# Local configuration files (CRITICAL SECURITY: Do not push secrets to GitHub)
+backend/.env
+.env
+
+# Diagnostic logs and caches
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Project archives
+*.zip
+*.rar
+*.tar.gz
