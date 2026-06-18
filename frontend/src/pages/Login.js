@@ -1,7 +1,7 @@
 // frontend/src/pages/Login.js
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { API_BASE } from '../api'; // Import the correct backend URL
+import { API_BASE } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
@@ -10,7 +10,6 @@ const Login = () => {
   const params = new URLSearchParams(location.search);
   const isExpired = params.get('expired') === 'true';
 
-  // If the user is already logged in, skip the login page entirely!
   if (!loading && user) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -19,35 +18,69 @@ const Login = () => {
     window.location.href = `${API_BASE}/auth/google`;
   };
 
-  const isDev = process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const isDev =
+    import.meta.env.DEV ||
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1';
 
   return (
-    <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
-      <div className="auth-card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎓</div>
-        <h2>Welcome to Support Hub</h2>
-        <p className="text-muted" style={{ marginBottom: '2rem' }}>
-          {isExpired ? 'Your session expired. Please log in again.' : 'Log in to ask questions and view your dashboard.'}
+    <div className="login-page">
+      <div className="login-card">
+        {/* Icon */}
+        <div className="login-card__icon">💬</div>
+
+        <h1 className="login-card__title" style={{ fontFamily: 'var(--font-serif)', fontSize: '26px', fontWeight: '700', color: 'var(--text-heading)', marginBottom: '8px' }}>
+          Welcome to SupportHub
+        </h1>
+
+        {isExpired && (
+          <div className="alert alert--warn" style={{ marginTop: '12px', marginBottom: '0' }}>
+            ⚠️ Your session expired. Please log in again.
+          </div>
+        )}
+
+        <p className="text-muted" style={{ marginTop: '12px', marginBottom: '32px', fontSize: '15px', lineHeight: '1.6' }}>
+          {isExpired
+            ? 'Sign in to continue where you left off.'
+            : 'Sign in to ask questions, browse the knowledge base, and get AI-powered answers.'}
         </p>
 
-        <button 
-          onClick={handleGoogleLogin} 
-          className="btn-primary" 
-          style={{ width: '100%', padding: '12px', fontSize: '1.1rem', display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}
+        {/* Google Sign-in */}
+        <button
+          id="google-login-btn"
+          onClick={handleGoogleLogin}
+          className="btn-google"
+          style={{ fontSize: '15px', fontWeight: '600' }}
         >
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G" width="20" height="20" style={{ background: '#fff', borderRadius: '50%', padding: '2px' }}/>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+            alt="Google"
+            width="20"
+            height="20"
+            style={{ background: '#fff', borderRadius: '50%', padding: '2px' }}
+          />
           Continue with Google
         </button>
 
-        {/* LOCAL DEVELOPMENT BYPASS BUTTONS */}
+        <p style={{ marginTop: '20px', fontSize: '12px', color: 'var(--text-subtle)', lineHeight: '1.5' }}>
+          By continuing, you agree to our terms of service and privacy policy.
+        </p>
+
+        {/* Dev-only bypass */}
         {isDev && (
-          <div style={{ marginTop: '2.5rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Local Testing Only</p>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <a href={`${API_BASE}/auth/bypass`} className="btn-ghost" style={{ flex: 1, fontSize: '0.9rem' }}>
+          <div style={{
+            marginTop: '28px',
+            paddingTop: '20px',
+            borderTop: '1px solid var(--border-color)',
+          }}>
+            <p style={{ fontSize: '11px', color: 'var(--text-subtle)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>
+              Local Testing Only
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <a href={`${API_BASE}/auth/bypass`} className="btn-ghost" style={{ flex: 1, fontSize: '13px', textAlign: 'center' }}>
                 Admin Bypass
               </a>
-              <a href={`${API_BASE}/auth/bypass-student`} className="btn-ghost" style={{ flex: 1, fontSize: '0.9rem' }}>
+              <a href={`${API_BASE}/auth/bypass-student`} className="btn-ghost" style={{ flex: 1, fontSize: '13px', textAlign: 'center' }}>
                 Student Bypass
               </a>
             </div>
