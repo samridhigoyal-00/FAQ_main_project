@@ -1,4 +1,3 @@
-// frontend/src/pages/Dashboard.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
@@ -20,11 +19,11 @@ const Dashboard = () => {
 
   return (
     <div className="page page--narrow">
-      {/* ── Header ── */}
+      {}
       <header className="dash-header">
         <div>
           <h1>
-            👋 Welcome back, <span className="gradient-text">{firstName}</span>!
+            Welcome back, <span className="gradient-text">{firstName}</span>.
           </h1>
           <p style={{ color: 'var(--text-muted)', marginTop: '6px', fontSize: '15px' }}>
             Here's your support platform overview.
@@ -33,69 +32,52 @@ const Dashboard = () => {
         <span className="role-pill">{user?.role || 'student'}</span>
       </header>
 
-      {/* ── Stats ── */}
+      {}
       {loading ? (
         <div className="loading-grid">
-          {[1, 2, 3].map(i => <div key={i} className="skeleton-card" style={{ height: '90px' }} />)}
+          {[1, 2, 3].map(i => <div key={i} className="skeleton-card" style={{ height: '50px' }} />)}
         </div>
       ) : stats && (
-        <div className="stats-grid">
-          <div className="stat-tile stat-tile--primary">
-            <span className="stat-tile__icon">📚</span>
-            <div>
-              <p className="stat-tile__label">Published FAQs</p>
-              <p className="stat-tile__value">{stats.approved || 0}</p>
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '36px' }}>
+          <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '15px', color: 'var(--text-muted)' }}>Published FAQs</span>
+            <span style={{ fontSize: '18px', fontWeight: '500', color: 'var(--text-heading)' }}>{stats.approved || 0}</span>
           </div>
-          <div className="stat-tile stat-tile--warn">
-            <span className="stat-tile__icon">⏳</span>
-            <div>
-              <p className="stat-tile__label">Pending Reviews</p>
-              <p className="stat-tile__value">{stats.pending || 0}</p>
-            </div>
+          <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '15px', color: 'var(--text-muted)' }}>Pending Reviews</span>
+            <span style={{ fontSize: '18px', fontWeight: '500', color: 'var(--text-heading)' }}>{stats.pending || 0}</span>
           </div>
-          <div className="stat-tile stat-tile--ai">
-            <span className="stat-tile__icon">🤖</span>
-            <div>
-              <p className="stat-tile__label">AI Messages Left</p>
-              <p className="stat-tile__value">
-                {stats.aiRemaining || 0}
-                <small style={{ fontSize: '14px', fontWeight: '400', color: 'var(--text-muted)' }}>
-                  {' '}/ {stats.aiDailyLimit}
-                </small>
-              </p>
-            </div>
+          <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '15px', color: 'var(--text-muted)' }}>AI Messages Left</span>
+            <span style={{ fontSize: '18px', fontWeight: '500', color: 'var(--text-heading)' }}>
+              {stats.aiRemaining || 0} <span style={{ fontSize: '14px', color: 'var(--text-subtle)' }}>/ {stats.aiDailyLimit}</span>
+            </span>
           </div>
         </div>
       )}
 
-      {/* ── Quick Actions ── */}
-      <div className="quick-grid">
-        <Link to="/add-faq" className="quick-card hover-lift">
-          <span>✍️</span>
-          <h3>Submit FAQ</h3>
-          <p>Contribute a question and answer to help the community.</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '44px' }}>
+        <Link to="/add-faq" style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', color: 'var(--text-color)', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} className="hover-lift">
+          <span style={{ fontSize: '15px', fontWeight: '500' }}>Submit FAQ</span>
+          <span style={{ color: 'var(--text-subtle)' }}>→</span>
         </Link>
-        <Link to="/my-submissions" className="quick-card hover-lift">
-          <span>📋</span>
-          <h3>My Submissions</h3>
-          <p>Track the status of your submitted FAQs.</p>
+        <Link to="/my-submissions" style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', color: 'var(--text-color)', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} className="hover-lift">
+          <span style={{ fontSize: '15px', fontWeight: '500' }}>My Submissions</span>
+          <span style={{ color: 'var(--text-subtle)' }}>→</span>
         </Link>
-        <Link to="/chat" className="quick-card quick-card--ai hover-lift">
-          <span>💬</span>
-          <h3>AI Chat Tutor</h3>
-          <p>Get instant answers from our AI — available 24/7.</p>
+        <Link to="/chat" style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', color: 'var(--text-color)', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} className="hover-lift">
+          <span style={{ fontSize: '15px', fontWeight: '500' }}>AI Chat Tutor</span>
+          <span style={{ color: 'var(--text-subtle)' }}>→</span>
         </Link>
         {user?.role === 'admin' && (
-          <Link to="/admin" className="quick-card quick-card--admin hover-lift">
-            <span>🛡️</span>
-            <h3>Admin Panel</h3>
-            <p>Review and manage all submitted FAQs.</p>
+          <Link to="/admin" style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', color: 'var(--text-color)', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} className="hover-lift">
+            <span style={{ fontSize: '15px', fontWeight: '500' }}>Admin Panel</span>
+            <span style={{ color: 'var(--text-subtle)' }}>→</span>
           </Link>
         )}
       </div>
 
-      {/* ── Browse CTA ── */}
+      {}
       <div className="cta-ai-banner">
         <p style={{ fontFamily: 'var(--font-serif)', fontSize: '18px', fontWeight: '700', marginBottom: '8px', color: 'var(--text-heading)' }}>
           Looking for a specific answer?

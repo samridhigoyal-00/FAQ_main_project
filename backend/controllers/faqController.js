@@ -1,4 +1,3 @@
-// backend/controllers/faqController.js
 const faqService = require('../services/faqService');
 const aiService = require('../services/aiService');
 const ChatUsage = require('../models/ChatUsage');
@@ -6,7 +5,6 @@ const config = require('../config/env');
 
 function todayKey() { return new Date().toISOString().slice(0, 10); }
 
-// Checks usage limit WITHOUT incrementing (pre-flight check)
 async function checkAIUsage(userId) {
   const date = todayKey();
   const usage = await ChatUsage.findOne({ userId, date });
@@ -15,7 +13,6 @@ async function checkAIUsage(userId) {
   return { allowed, count, remaining: Math.max(0, config.aiDailyLimit - count), limit: config.aiDailyLimit };
 }
 
-// Increments ONLY after success
 async function incrementAIUsage(userId) {
   const date = todayKey();
   const usage = await ChatUsage.findOneAndUpdate({ userId, date }, { $inc: { count: 1 } }, { upsert: true, new: true });
@@ -112,14 +109,11 @@ const chatWithAI = async (req, res, next) => {
     const { message, history } = req.body;
     if (!message?.trim()) return res.status(400).json({ message: 'Message is required' });
 
-    // 1. Pre-flight check — do NOT increment yet
     const check = await checkAIUsage(String(req.user.id));
     if (!check.allowed) return res.status(429).json({ message: 'Daily AI limit reached.', remaining: 0, limit: check.limit });
 
-    // 2. Call AI — if this throws, the counter is never incremented
     const aiResult = await aiService.generateResponse(message, history);
 
-    // 3. Only charge usage after a successful response
     const updated = await incrementAIUsage(String(req.user.id));
     res.json({ text: aiResult.text, relatedFaqs: aiResult.relatedFaqs, remaining: updated.remaining, limit: updated.limit });
   } catch (err) { next(err); }

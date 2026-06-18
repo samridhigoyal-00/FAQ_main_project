@@ -1,10 +1,9 @@
-// frontend/src/pages/AdminPanel.js
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '../api'; // Notice we removed getAuthConfig, the smart interceptor handles it!
-import { useAuth } from '../context/AuthContext'; // 1. Import our Context Cloud
+import api from '../api';
+import { useAuth } from '../context/AuthContext';
 
-const AdminPanel = () => { // 2. Remove the { user } prop!
-  const { user } = useAuth(); // 3. Grab the user directly from the cloud
+const AdminPanel = () => {
+  const { user } = useAuth();
   
   const [faqs, setFaqs] = useState([]);
   const [analytics, setAnalytics] = useState(null);
@@ -17,7 +16,6 @@ const AdminPanel = () => { // 2. Remove the { user } prop!
 
   const fetchAll = useCallback(async () => {
     try {
-      // 4. Removed getAuthConfig() from all API calls below
       const [faqRes, analyticsRes] = await Promise.all([
         api.get('/faq/admin/all'),
         api.get('/faq/admin/analytics')
@@ -36,10 +34,10 @@ const AdminPanel = () => { // 2. Remove the { user } prop!
   const handleApprove = async (id) => {
     try {
       await api.post(`/faq/${id}/approve`, {});
-      setMessage('✅ Approved & published');
+      setMessage(' Approved & published');
       fetchAll();
     } catch {
-      setMessage('❌ Approve failed');
+      setMessage(' Approve failed');
     }
   };
 
@@ -51,7 +49,7 @@ const AdminPanel = () => { // 2. Remove the { user } prop!
       setRejectReason('');
       fetchAll();
     } catch {
-      setMessage('❌ Reject failed');
+      setMessage(' Reject failed');
     }
   };
 
@@ -62,7 +60,7 @@ const AdminPanel = () => { // 2. Remove the { user } prop!
       setMessage('Deleted');
       fetchAll();
     } catch {
-      setMessage('❌ Delete failed');
+      setMessage(' Delete failed');
     }
   };
 
@@ -70,10 +68,10 @@ const AdminPanel = () => { // 2. Remove the { user } prop!
     try {
       await api.put(`/faq/${id}`, editData);
       setEditId(null);
-      setMessage('✅ Updated');
+      setMessage(' Updated');
       fetchAll();
     } catch {
-      setMessage('❌ Update failed');
+      setMessage(' Update failed');
     }
   };
 
@@ -81,7 +79,7 @@ const AdminPanel = () => { // 2. Remove the { user } prop!
     return (
       <div className="page">
         <div className="empty-state-card">
-          <h2>🚫 Admin only</h2>
+          <h2> Admin only</h2>
           <p>You need admin access for this page.</p>
         </div>
       </div>
@@ -116,7 +114,7 @@ const AdminPanel = () => { // 2. Remove the { user } prop!
           <p className="admin-card__answer">{faq.answer}</p>
           <small className="text-muted">
             By {faq.createdBy} · {faq.source || 'student'} · ▲{faq.upvotes?.length || 0}
-            {faq.reports?.length > 0 && ` · ⚠️ ${faq.reports.length} report(s)`}
+            {faq.reports?.length > 0 && ` · ️ ${faq.reports.length} report(s)`}
           </small>
           {faq.reports?.length > 0 && (
             <div className="reports-list">
@@ -139,7 +137,7 @@ const AdminPanel = () => { // 2. Remove the { user } prop!
           ) : (
             <div className="btn-row">
               {getStatus(faq) !== 'approved' && (
-                <button type="button" className="btn-sm btn-primary" onClick={() => handleApprove(faq._id)}>✅ Approve</button>
+                <button type="button" className="btn-sm btn-primary" onClick={() => handleApprove(faq._id)}> Approve</button>
               )}
               {getStatus(faq) !== 'rejected' && (
                 <button type="button" className="btn-sm btn-danger" onClick={() => { setRejectId(faq._id); setRejectReason(''); }}>Reject</button>
@@ -157,7 +155,7 @@ const AdminPanel = () => { // 2. Remove the { user } prop!
     <div className="page page--wide">
       <header className="dash-header">
         <div>
-          <h1>🛠️ Admin Control</h1>
+          <h1>️ Admin Control</h1>
           <p>Approve student FAQs, reject low quality, monitor platform health.</p>
         </div>
       </header>
@@ -166,10 +164,10 @@ const AdminPanel = () => { // 2. Remove the { user } prop!
 
       {analytics && (
         <div className="analytics-grid">
-          <div className="analytics-tile"><span>✅ Approved</span><strong>{analytics.approved}</strong></div>
-          <div className="analytics-tile"><span>⏳ Pending</span><strong>{analytics.pending}</strong></div>
-          <div className="analytics-tile"><span>❌ Rejected</span><strong>{analytics.rejected}</strong></div>
-          <div className="analytics-tile"><span>🤖 AI msgs today</span><strong>{analytics.aiMessagesToday}</strong></div>
+          <div className="analytics-tile"><span> Approved</span><strong>{analytics.approved}</strong></div>
+          <div className="analytics-tile"><span> Pending</span><strong>{analytics.pending}</strong></div>
+          <div className="analytics-tile"><span> Rejected</span><strong>{analytics.rejected}</strong></div>
+          <div className="analytics-tile"><span> AI msgs today</span><strong>{analytics.aiMessagesToday}</strong></div>
         </div>
       )}
 

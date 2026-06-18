@@ -1,4 +1,3 @@
-// backend/config/env.js
 require('dotenv').config();
 
 const config = {
@@ -10,12 +9,10 @@ const config = {
   geminiApiKey: process.env.GEMINI_API_KEY,
   nodeEnv: process.env.NODE_ENV || 'development',
   
-  // Add these two lines:
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET
 };
 
-// Fail fast if critical environment variables are missing
 if (!config.mongoUri) {
   console.error('FATAL ERROR: MONGO_URI is not defined in .env');
   process.exit(1);

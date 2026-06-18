@@ -1,10 +1,6 @@
-// backend/utils/faqHelpers.js
 const FAQ = require('../models/FAQ');
 
-/**
- * Sorensen-Dice Coefficient for normalized text similarity.
- * Returns a value between 0 (no match) and 1 (identical).
- */
+
 function getSimilarityScore(a, b) {
   const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
   const getBigrams = (str) => {
@@ -34,7 +30,6 @@ async function findSimilarFAQs(question, limit = 5) {
 
   let candidates = [];
   try {
-    // Try text-index search first (fast, DB-side)
     candidates = await FAQ.find(
       {
         $text: { $search: trimmed },
@@ -46,7 +41,6 @@ async function findSimilarFAQs(question, limit = 5) {
       .limit(20) // Fetch more candidates for re-ranking
       .lean();
   } catch (_err) {
-    // Fallback: regex scan if text index hasn't built yet
     const regex = new RegExp(trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     candidates = await FAQ.find(
       { $or: [{ isApproved: true }, { status: 'approved' }], question: regex },
@@ -56,7 +50,6 @@ async function findSimilarFAQs(question, limit = 5) {
 
   if (!candidates.length) return [];
 
-  // Re-rank using normalized Sorensen-Dice for accurate 0–1 scores
   return candidates
     .map(faq => ({ ...faq, score: getSimilarityScore(trimmed, faq.question) }))
     .filter(faq => faq.score > 0)
@@ -78,10 +71,9 @@ async function searchApprovedFAQs(query, limit = 5) {
       .lean();
     if (textResults.length > 0) return textResults;
   } catch (_) {
-    /* Handle missing text index silently */
+    
   }
 
-  // Fallback to regex (less efficient, but works if indexes are building)
   const regex = new RegExp(trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
   return FAQ.find({
     isApproved: true,

@@ -1,4 +1,3 @@
-// frontend/src/pages/Home.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
@@ -18,19 +17,22 @@ const FAQItem = ({ faq, highlight }) => {
   return (
     <article className={`faq-card${open ? ' faq-card--open' : ''}`}>
       <button className="faq-card__header" onClick={() => setOpen(o => !o)} aria-expanded={open}>
-        <span className={`faq-card__chevron${open ? ' open' : ''}`}>▶</span>
         <span className="faq-card__question">{hl(faq.question)}</span>
-        <span style={{ fontSize: '11px', color: 'var(--text-subtle)', whiteSpace: 'nowrap' }}>
-          ▲ {faq.upvotes?.length || 0}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '11px', color: 'var(--text-subtle)', whiteSpace: 'nowrap' }}>
+            ▲ {faq.upvotes?.length || 0}
+          </span>
+          <span className={`faq-card__toggle-icon ${open ? 'open' : ''}`}>
+            {open ? '−' : '+'}
+          </span>
+        </div>
       </button>
       {open && (
         <div className="faq-card__body">
-          <p className="faq-card__answer-label">Answer</p>
           <p className="faq-card__answer">{hl(faq.answer)}</p>
           <div className="faq-card__footer">
-            <span>✍️ {faq.createdBy || 'Community'}</span>
-            <span>💬 {faq.replies?.length || 0} replies</span>
+            <span>{faq.createdBy || 'Community'}</span>
+            <span>{faq.replies?.length || 0} replies</span>
             {faq.createdAt && (
               <span>{new Date(faq.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
             )}
@@ -60,19 +62,17 @@ const Home = () => {
 
   return (
     <div className="page page--narrow">
-      {/* ── Hero ── */}
+      {}
       <header className="hero" style={{ position: 'relative' }}>
-        <span className="hero__badge">📚 Community Knowledge Base</span>
+        <span className="hero__badge">Community Knowledge Base</span>
         <h1 className="hero__title">
-          How can we <span className="gradient-text">help you?</span>
+          Frequently Asked Questions
         </h1>
         <p className="hero__subtitle">
           Browse community-sourced answers, or ask our AI tutor for personalised guidance.
         </p>
 
-        {/* Search */}
         <div className="search-hero">
-          <span className="search-hero__icon" style={{ left: '22px' }}>🔍</span>
           <input
             id="faq-search"
             type="search"
@@ -81,6 +81,7 @@ const Home = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             autoComplete="off"
+            style={{ paddingLeft: '20px' }}
           />
           {user && (
             <Link to="/chat" className="btn-primary search-hero__btn">
@@ -88,23 +89,9 @@ const Home = () => {
             </Link>
           )}
         </div>
-
-        {/* Quick-action cards */}
-        <div className="method-cards" style={{ marginTop: '40px', textAlign: 'left' }}>
-          <div className="method-card method-card--faq">
-            <span className="method-card__num">1</span>
-            <h3>Browse FAQs</h3>
-            <p>Search our growing library of community-contributed questions and answers.</p>
-          </div>
-          <div className="method-card method-card--ai">
-            <span className="method-card__num">2</span>
-            <h3>AI Chat Tutor</h3>
-            <p>Get an instant, personalised answer from our AI assistant — available 24/7.</p>
-          </div>
-        </div>
       </header>
 
-      {/* ── FAQ List ── */}
+      {}
       <section>
         <div className="toolbar">
           <h2 style={{ fontSize: '20px', fontFamily: 'var(--font-serif)', fontWeight: '700', color: 'var(--text-heading)' }}>
@@ -129,7 +116,6 @@ const Home = () => {
           </div>
         ) : (
           <div className="empty-state-card">
-            <span className="empty-icon">🔎</span>
             <h2 style={{ fontFamily: 'var(--font-serif)', marginBottom: '8px' }}>No answers found</h2>
             <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
               We couldn't find an exact match for "<strong>{search}</strong>".
@@ -147,7 +133,7 @@ const Home = () => {
           </div>
         )}
 
-        {/* CTA for logged-out */}
+        {}
         {!user && !loading && faqs.length > 0 && (
           <div className="cta-ai-banner" style={{ marginTop: '40px' }}>
             <p style={{ fontFamily: 'var(--font-serif)', fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>

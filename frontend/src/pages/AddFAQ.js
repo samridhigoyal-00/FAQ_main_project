@@ -1,11 +1,10 @@
-// frontend/src/pages/AddFAQ.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const AddFAQ = () => {
-  const { user } = useAuth(); // Grab user from Context
+  const { user } = useAuth();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({ question: '', answer: '' });
@@ -16,7 +15,6 @@ const AddFAQ = () => {
   const checkDuplicates = async () => {
     if (!formData.question.trim() || formData.question.length < 10) return;
     try {
-      // Smart API call
       const res = await api.post('/faq/check-duplicate', { question: formData.question });
       if (res.data.hasDuplicate) {
         setDuplicateWarning(res.data.similar);
@@ -34,9 +32,8 @@ const AddFAQ = () => {
     setLoading(true);
 
     try {
-      // Smart API call
       await api.post('/faq/add', formData);
-      navigate('/my-submissions'); // Send them to see their new submission!
+      navigate('/my-submissions');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit FAQ.');
     } finally {
@@ -48,7 +45,7 @@ const AddFAQ = () => {
     <div className="page page--narrow">
       <header className="dash-header">
         <div>
-          <h1>📝 Submit a new FAQ</h1>
+          <h1> Submit a new FAQ</h1>
           <p>Help your fellow students by documenting a solution.</p>
         </div>
       </header>
@@ -71,7 +68,7 @@ const AddFAQ = () => {
 
         {duplicateWarning && (
           <div className="alert alert--warn">
-            <strong>⚠️ Similar FAQs found:</strong>
+            <strong>️ Similar FAQs found:</strong>
             <ul style={{ margin: '8px 0 0 16px', fontSize: '0.9rem' }}>
               {duplicateWarning.slice(0, 2).map((faq, i) => (
                 <li key={i}>{faq.question}</li>
