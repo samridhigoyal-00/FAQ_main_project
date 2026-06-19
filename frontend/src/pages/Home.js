@@ -14,7 +14,7 @@ const Home = () => {
     const delayDebounceFn = setTimeout(() => {
       setLoading(true);
       // Public route, no authentication needed, but smart API handles it fine!
-      api.get('/faq', { params: { search, limit: 20 } })
+      api.get('/faq', { params: { search, limit: 20, sort: 'upvotes' } })
         .then(res => setFaqs(res.data.faqs))
         .catch(console.error)
         .finally(() => setLoading(false));
@@ -51,9 +51,37 @@ const Home = () => {
               <article key={faq._id} className="admin-card hover-lift">
                 <h3>{faq.question}</h3>
                 <p style={{ marginTop: '8px', color: 'var(--text-muted)' }}>{faq.answer}</p>
-                <div style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--primary)' }}>
-                  ▲ {faq.upvotes?.length || 0} Upvotes
-                </div>
+<div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+  <button
+    onClick={async () => {
+      if (!user) return alert('Please login to upvote');
+      try {
+        const res = await api.post(`/faq/${faq._id}/upvote`);
+        setFaqs(prev => prev.map(f =>
+          f._id === faq._id ? { ...f, upvotes: res.data.upvotes } : f
+        ));
+      } catch (err) {
+        console.error(err);
+      }
+    }}
+    style={{
+      background: 'none',
+      border: `1px solid ${faq.upvotes?.includes(user?.id) ? 'var(--primary)' : 'var(--border)'}`,
+      color: faq.upvotes?.includes(user?.id) ? 'var(--primary)' : 'var(--text-muted)',
+      borderRadius: '20px',
+      padding: '4px 12px',
+      cursor: user ? 'pointer' : 'default',
+      fontSize: '0.85rem',
+      fontWeight: '600',
+      transition: 'all 0.2s'
+    }}
+  >
+    ▲ {faq.upvotes?.length || 0}
+  </button>
+  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+    {faq.upvotes?.length === 1 ? '1 upvote' : `${faq.upvotes?.length || 0} upvotes`}
+  </span>
+</div>
               </article>
             ))}
           </div>

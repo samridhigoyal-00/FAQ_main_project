@@ -10,7 +10,6 @@ function syncStatus(faq) {
   else { faq.status = 'pending'; faq.isApproved = false; }
   return faq;
 }
-
 const getApprovedFAQs = async (page, limit, search, sort) => {
   const skip = (page - 1) * limit;
   const filter = { isApproved: true, status: { $ne: 'rejected' } };
@@ -20,20 +19,33 @@ const getApprovedFAQs = async (page, limit, search, sort) => {
     try {
       const textFilter = { ...filter, $text: { $search: search } };
       total = await FAQ.countDocuments(textFilter);
-      faqs = await FAQ.find(textFilter, { score: { $meta: 'textScore' } }).sort(sort === 'upvotes' ? { upvotes: -1 } : { score: { $meta: 'textScore' } }).skip(skip).limit(limit);
+      faqs = await FAQ.find(textFilter, { score: { $meta: 'textScore' } })
+        .sort({ score: { $meta: 'textScore' } })
+        .skip(skip).limit(limit);
     } catch {
       const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
       const regexFilter = { ...filter, $or: [{ question: regex }, { answer: regex }] };
       total = await FAQ.countDocuments(regexFilter);
-      faqs = await FAQ.find(regexFilter).sort(sort === 'upvotes' ? { upvotes: -1 } : { createdAt: -1 }).skip(skip).limit(limit);
+      faqs = await FAQ.find(regexFilter).sort({ createdAt: -1 }).skip(skip).limit(limit);
     }
   } else {
     total = await FAQ.countDocuments(filter);
-    faqs = await FAQ.find(filter).sort(sort === 'upvotes' ? { upvotes: -1 } : { createdAt: -1 }).skip(skip).limit(limit);
+
+    if (sort === 'upvotes') {
+      faqs = await FAQ.aggregate([
+        { $match: filter },
+        { $addFields: { upvoteCount: { $size: { $ifNull: ['$upvotes', []] } } } },
+        { $sort: { upvoteCount: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit }
+      ]);
+    } else {
+      faqs = await FAQ.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit);
+    }
   }
+
   return { faqs, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 } };
 };
-
 const getSearchSuggestions = async (query) => {
   const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
   return await FAQ.find({ isApproved: true, question: regex }, { question: 1, _id: 1 }).limit(5);
