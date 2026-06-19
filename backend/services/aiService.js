@@ -1,9 +1,7 @@
-// backend/services/aiService.js
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const config = require('../config/env');
 const { searchApprovedFAQs } = require('../utils/faqHelpers');
 
-// 1. Initialize the client ONCE outside of the request cycle
 let genAI = null;
 let model = null;
 
@@ -18,7 +16,6 @@ const generateResponse = async (message, history) => {
     ? relatedFaqs.map((f, i) => `[FAQ ${i + 1}] Q: ${f.question}\nA: ${f.answer || 'N/A'}`).join('\n\n')
     : 'No matching FAQs in knowledge base.';
 
-  // 2. Demo mode if no API key is provided
   if (!model) {
     const mockAnswer = relatedFaqs[0]
       ? `Based on our FAQ library:\n\n**${relatedFaqs[0].question}**\n${relatedFaqs[0].answer}\n\n(Add GEMINI_API_KEY in backend/.env for full AI responses.)`
@@ -27,7 +24,6 @@ const generateResponse = async (message, history) => {
     return { text: mockAnswer, relatedFaqs };
   }
 
-  // 3. Real AI Mode
   const systemPreamble = `You are a helpful student support assistant...
 --- APPROVED FAQ CONTEXT ---
 ${contextBlock}
@@ -47,13 +43,11 @@ ${contextBlock}
     );
   }
 
-  // Helper to sanitize history for Gemini schema rules (alternating roles, starting with user, ending with model)
   const sanitizeHistory = (historyArray) => {
     const clean = [];
     for (const msg of historyArray) {
       if (!msg.parts?.[0]?.text) continue;
       if (clean.length > 0 && clean[clean.length - 1].role === msg.role) {
-        // Merge consecutive identical roles to preserve content while respecting schema
         clean[clean.length - 1].parts[0].text += '\n' + msg.parts[0].text;
       } else {
         clean.push({ role: msg.role, parts: [{ text: msg.parts[0].text }] });

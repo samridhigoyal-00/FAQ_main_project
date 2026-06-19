@@ -1,12 +1,11 @@
-// frontend/src/pages/MySubmissions.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api'; // Removed getAuthConfig
+import api from '../api';
 
 const statusConfig = {
-  approved: { label: 'Approved', className: 'badge badge--success', icon: '✅' },
-  pending: { label: 'Pending review', className: 'badge badge--warn', icon: '⏳' },
-  rejected: { label: 'Rejected', className: 'badge badge--danger', icon: '❌' }
+  approved: { label: 'Approved', className: 'badge badge--success', icon: '' },
+  pending: { label: 'Pending review', className: 'badge badge--warn', icon: '' },
+  rejected: { label: 'Rejected', className: 'badge badge--danger', icon: '' }
 };
 
 const MySubmissions = () => {
@@ -15,7 +14,6 @@ const MySubmissions = () => {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    // Removed getAuthConfig(), the API client handles it now!
     api.get('/faq/my-submissions')
       .then(res => setFaqs(res.data))
       .catch(console.error)
@@ -31,7 +29,7 @@ const MySubmissions = () => {
     <div className="page page--narrow">
       <header className="dash-header">
         <div>
-          <h1>📬 My Submissions</h1>
+          <h1> My Submissions</h1>
           <p>FAQs you submitted — only approved ones appear on the public library.</p>
         </div>
         <Link to="/add-faq" className="btn-primary">+ New submission</Link>
@@ -55,7 +53,7 @@ const MySubmissions = () => {
         <div className="loading-grid">{[1, 2].map(i => <div key={i} className="skeleton-card" />)}</div>
       ) : filtered.length === 0 ? (
         <div className="empty-state-card">
-          <span className="empty-icon">📭</span>
+          <span className="empty-icon"></span>
           <h3>No submissions yet</h3>
           <p>Help thousands of students — share a problem you solved.</p>
           <Link to="/add-faq" className="btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>Submit FAQ</Link>

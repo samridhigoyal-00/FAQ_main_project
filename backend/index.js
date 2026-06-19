@@ -1,10 +1,8 @@
-// backend/index.js
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const passport = require('passport');
 
-// 1. Import our new centralized config
 const config = require('./config/env'); 
 require('./config/passport');
 
@@ -28,16 +26,12 @@ app.use(cors({
 
 app.use(express.json()); 
 
-// --- NEW SECURITY MIDDLEWARES ---
 
-// 1. Helmet: Hides Express from hackers and secures HTTP headers
 app.use(helmet());
 
-// 2. Global Rate Limiter: Prevent DDoS attacks
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   
-  // Keep it strict (100) for production, but give yourself 5,000 requests for local testing!
   max: config.nodeEnv === 'development' ? 5000 : 100, 
   
   message: { message: 'Too many requests from this IP, please try again after 15 minutes.' },
@@ -45,24 +39,18 @@ const globalLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Apply the rate limiter to all routes
 app.use(globalLimiter);
 
-// 3. Strict Rate Limiter for AI Chat & Adding FAQs
 const strictLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   
-  // Relax the strict limit during development as well
   max: config.nodeEnv === 'development' ? 500 : 10, 
   
   message: { message: 'Please slow down your requests.' }
 });
-// Apply strict limits to specific routes *before* they hit the router
 app.use('/faq/chat', strictLimiter);
 app.use('/faq/add', strictLimiter);
 
-// 4. View-Count Limiter: Prevent view inflation from scripts
-// Allows max 30 view increments per IP per minute
 const viewLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: config.nodeEnv === 'development' ? 500 : 30,
@@ -70,11 +58,8 @@ const viewLimiter = rateLimit({
 });
 app.use('/faq/:id/view', viewLimiter);
 
-// --- END SECURITY MIDDLEWARES ---
 app.use(passport.initialize());
 
-// Note: Removed the runMigrations() function from startup. 
-// Migrations should be handled by a script, not on every server boot.
 
 mongoose.connect(config.mongoUri)
   .then(() => {
@@ -91,7 +76,6 @@ app.use('/faq', faqRoutes);
 
 app.get('/', (req, res) => res.send('FAQ Support Platform API'));
 
-// 2. Add a Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack); // Logs the actual error in your terminal
   res.status(500).json({ 

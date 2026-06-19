@@ -1,9 +1,7 @@
-// backend/services/faqService.js
 const FAQ = require('../models/FAQ');
 const ChatUsage = require('../models/ChatUsage');
 const { findSimilarFAQs } = require('../utils/faqHelpers');
 
-// Helper to format the status exactly how the frontend expects it
 function syncStatus(faq) {
   if (faq.status === 'rejected') faq.isApproved = false;
   else if (faq.status === 'approved' || faq.isApproved) { faq.status = 'approved'; faq.isApproved = true; }
@@ -41,7 +39,6 @@ const getSearchSuggestions = async (query) => {
 
 const checkDuplicate = async (question) => findSimilarFAQs(question, 5);
 
-// Fixed: Using the original createdById and createdBy fields
 const getUserSubmissions = async (userId, userName) => {
   const faqs = await FAQ.find({
     $or: [ { createdById: userId }, { createdBy: userName, createdById: { $exists: false } } ]
@@ -49,7 +46,6 @@ const getUserSubmissions = async (userId, userName) => {
   return faqs.map(syncStatus);
 };
 
-// Fixed: Using the original schema fields
 const addFaq = async (data, user) => {
   const isAdminUser = user.role === 'admin';
   const faq = new FAQ({
@@ -76,7 +72,6 @@ const getStats = async () => {
   return { approved, pending, rejected, totalReplies: totalReplies[0]?.total || 0, totalReports: totalReports[0]?.total || 0 };
 };
 
-// Fixed: Restored Admin Analytics
 const getAdminAnalytics = async (todayKey) => {
   const [approved, pending, rejected, bySource, topUpvoted, recentReports] = await Promise.all([
     FAQ.countDocuments({ isApproved: true }),
@@ -113,7 +108,6 @@ const rejectFaq = async (id, reason) => {
 const reportFaq = async (id, reason, reportedBy) => {
   const faq = await FAQ.findById(id);
   if (!faq) return null;
-  // Prevent duplicate reports from the same user
   const alreadyReported = faq.reports.some(r => r.reportedBy === reportedBy);
   if (alreadyReported) return { alreadyReported: true };
   faq.reports.push({ reason: (reason || 'Incorrect or unhelpful').trim(), reportedBy });

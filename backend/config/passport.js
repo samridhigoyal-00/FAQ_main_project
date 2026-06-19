@@ -3,16 +3,13 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// 1. Import our central config
 const config = require('./env'); 
 
-// 2. Use the config object here instead of process.env
 passport.use(new GoogleStrategy({
   clientID: config.googleClientId,
   clientSecret: config.googleClientSecret,
   callbackURL: '/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
-  // ... rest of the file stays exactly the same ...
   try {
     let user = await User.findOne({ googleId: profile.id });
     if (!user) {

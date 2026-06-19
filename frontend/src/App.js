@@ -1,4 +1,3 @@
-// frontend/src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -12,11 +11,10 @@ import PrivateRoute from './components/PrivateRoute';
 import AuthSuccess from './pages/AuthSuccess';
 import AIChat from './pages/AIChat';
 
-// Import our new Context tools
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 function AppRoutes() {
-  const { loading } = useAuth(); // Grab loading state from the cloud
+  const { loading } = useAuth();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
@@ -33,7 +31,6 @@ function AppRoutes() {
     );
   }
 
-  // Look at how clean the Routes are now! No more user={user} props!
   return (
     <Router>
       <Navbar theme={theme} onToggleTheme={() => setTheme(t => t === 'light' ? 'dark' : 'light')} />
@@ -53,7 +50,6 @@ function AppRoutes() {
   );
 }
 
-// Wrap everything in the AuthProvider so all components can access the data
 function App() {
   return (
     <AuthProvider>

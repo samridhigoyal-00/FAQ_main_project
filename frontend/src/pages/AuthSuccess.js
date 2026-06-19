@@ -1,14 +1,12 @@
-// frontend/src/pages/AuthSuccess.js
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api';
-import { useAuth } from '../context/AuthContext'; // 1. Import the Cloud Hook
+import { useAuth } from '../context/AuthContext';
 
 const AuthSuccess = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // 2. Grab setUser directly from the context instead of expecting a prop!
   const { setUser } = useAuth(); 
 
   useEffect(() => {
@@ -18,11 +16,10 @@ const AuthSuccess = () => {
     if (token) {
       localStorage.setItem('token', token);
       
-      // We don't need to pass headers manually anymore thanks to our smart api.js!
       api.get('/auth/current-user')
         .then(res => {
-          setUser(res.data); // Save user to the global cloud
-          navigate('/dashboard'); // Send them to the app
+          setUser(res.data);
+          navigate('/dashboard');
         })
         .catch(err => {
           console.error('Failed to fetch user:', err);

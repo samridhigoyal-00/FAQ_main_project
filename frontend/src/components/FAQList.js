@@ -1,8 +1,7 @@
-// frontend/src/components/FAQList.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api'; // 1. Removed getAuthConfig()
-import { useAuth } from '../context/AuthContext'; // 2. Import the Cloud!
+import api from '../api';
+import { useAuth } from '../context/AuthContext';
 
 const FAQList = ({
   faqs,
@@ -13,7 +12,7 @@ const FAQList = ({
   onUpvote,
   compact = false
 }) => {
-  const { user } = useAuth(); // 3. Grab user directly from the Context Cloud
+  const { user } = useAuth();
   
   const [openId, setOpenId] = useState(null);
   const [reportingId, setReportingId] = useState(null);
@@ -39,7 +38,6 @@ const FAQList = ({
       return;
     }
     try {
-      // 4. Smart API interceptor automatically attaches the token!
       await api.post(`/faq/${faqId}/upvote`);
       onUpvote?.();
     } catch (e) {
@@ -50,7 +48,6 @@ const FAQList = ({
   const handleReport = async (faqId) => {
     if (!user) return;
     try {
-      // Smart API handles the token here too
       await api.post(`/faq/${faqId}/report`, { reason: reportReason || 'Incorrect or unhelpful' });
       setReportMsg('Report submitted. Thank you.');
       setTimeout(() => {
@@ -70,7 +67,6 @@ const FAQList = ({
   if (!faqs?.length) {
     return (
       <div className="empty-state-card">
-        <span className="empty-icon">🔍</span>
         <h3>No results</h3>
         <p>{emptyMessage}</p>
         <Link to="/chat" className="btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
@@ -85,8 +81,6 @@ const FAQList = ({
       {faqs.map(faq => {
         const isOpen = openId === faq._id;
         
-        // 5. Look how much easier this is! We just check the cloud user ID 
-        // against the upvotes array. No more decoding base64 tokens!
         const upvoted = user && faq.upvotes?.includes(user.id);
 
         return (
@@ -103,24 +97,27 @@ const FAQList = ({
                 if (next) trackView(faq._id);
               }}
             >
-              <span className={`faq-card__chevron ${isOpen ? 'open' : ''}`}>▶</span>
               <span className="faq-card__question">{highlightText(faq.question, search)}</span>
-              <div className="faq-card__meta" onClick={e => e.stopPropagation()}>
-                {showUpvote && (
-                  <button
-                    type="button"
-                    className={`upvote-btn ${upvoted ? 'upvote-btn--active' : ''}`}
-                    onClick={() => handleUpvote(faq._id)}
-                  >
-                    ▲ {faq.upvotes?.length || 0}
-                  </button>
-                )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className="faq-card__meta" onClick={e => e.stopPropagation()}>
+                  {showUpvote && (
+                    <button
+                      type="button"
+                      className={`upvote-btn ${upvoted ? 'upvote-btn--active' : ''}`}
+                      onClick={() => handleUpvote(faq._id)}
+                    >
+                      ▲ {faq.upvotes?.length || 0}
+                    </button>
+                  )}
+                </div>
+                <span className={`faq-card__toggle-icon ${isOpen ? 'open' : ''}`}>
+                  {isOpen ? '−' : '+'}
+                </span>
               </div>
             </button>
 
             {isOpen && (
               <div className="faq-card__body">
-                <div className="faq-card__answer-label">💡 Solution</div>
                 <p className="faq-card__answer">{highlightText(faq.answer || 'No answer yet.', search)}</p>
                 <div className="faq-card__footer">
                   <span>
@@ -145,7 +142,7 @@ const FAQList = ({
                       </div>
                     ) : (
                       <button type="button" className="btn-sm btn-ghost" onClick={() => setReportingId(faq._id)}>
-                        ⚠️ Report wrong answer
+                        Report issue
                       </button>
                     )}
                   </div>

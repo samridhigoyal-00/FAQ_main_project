@@ -1,4 +1,3 @@
-// frontend/src/pages/AIChat.js
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -12,10 +11,8 @@ const AIChat = () => {
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    // Fetch remaining usage limits
     api.get('/faq/chat/usage').then(res => setUsage(res.data)).catch(console.error);
     
-    // Initial greeting
     setMessages([{ role: 'assistant', content: `Hi ${user?.name?.split(' ')[0] || 'there'}! I'm your AI Support Tutor. Ask me anything about the platform or your courses!` }]);
   }, [user]);
 
@@ -35,7 +32,6 @@ const AIChat = () => {
     setLoading(true);
 
     try {
-      // Smart API call
       const res = await api.post('/faq/chat', { 
         message: userMessage.content, 
         history: messages.slice(-6) 
@@ -57,7 +53,7 @@ const AIChat = () => {
     <div className="page page--narrow">
       <header className="dash-header">
         <div>
-          <h1>💬 AI Tutor</h1>
+          <h1> AI Tutor</h1>
           <p>
             {usage.remaining !== null 
               ? `You have ${usage.remaining} of ${usage.limit} daily messages remaining.` 
@@ -68,7 +64,7 @@ const AIChat = () => {
 
       <div className="auth-card" style={{ padding: 0, height: '60vh', display: 'flex', flexDirection: 'column', maxWidth: '100%', margin: 0 }}>
         
-        {/* Chat Log */}
+        {}
         <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {messages.map((msg, i) => (
             <div key={i} style={{ alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
@@ -85,7 +81,7 @@ const AIChat = () => {
                 {msg.content}
               </div>
               
-              {/* Display Contextual FAQs if returned by the AI Service */}
+              {}
               {msg.relatedFaqs && msg.relatedFaqs.length > 0 && (
                 <div style={{ marginTop: '8px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                   <strong>Suggested reading:</strong>
@@ -106,7 +102,7 @@ const AIChat = () => {
           <div ref={bottomRef} />
         </div>
 
-        {/* Chat Input */}
+        {}
         <form onSubmit={handleSend} style={{ padding: '1rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '8px' }}>
           <input
             className="input-field"
