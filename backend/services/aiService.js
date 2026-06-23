@@ -1,9 +1,9 @@
-// backend/services/aiService.js
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const config = require('../config/env');
 const { searchApprovedFAQs } = require('../utils/faqHelpers');
+const { screenInput, validateOutput } = require('../security/promptGuard');
+const { buildSecurePrompt, generateCanary } = require('../security/promptHardener');
 
-// 1. Initialize the client ONCE outside of the request cycle
 let genAI = null;
 let model = null;
 
@@ -13,58 +13,53 @@ if (config.geminiApiKey && config.geminiApiKey !== 'YOUR_GEMINI_API_KEY_HERE') {
 }
 
 const generateResponse = async (message, history) => {
-  const relatedFaqs = await searchApprovedFAQs(message, 4);
+  const inputScreen = screenInput(message);
+  if (inputScreen.blocked) {
+    return { text: inputScreen.fallback, relatedFaqs: [], blocked: true };
+  }
+
+  const sanitizedMessage = inputScreen.normalized;
+  const relatedFaqs = await searchApprovedFAQs(sanitizedMessage, 4);
   const contextBlock = relatedFaqs.length
     ? relatedFaqs.map((f, i) => `[FAQ ${i + 1}] Q: ${f.question}\nA: ${f.answer || 'N/A'}`).join('\n\n')
     : 'No matching FAQs in knowledge base.';
 
-  // 2. Demo mode if no API key is provided
   if (!model) {
     const mockAnswer = relatedFaqs[0]
       ? `Based on our FAQ library:\n\n**${relatedFaqs[0].question}**\n${relatedFaqs[0].answer}\n\n(Add GEMINI_API_KEY in backend/.env for full AI responses.)`
-      : `[Demo mode] You asked: "${message}"\n\nNo close FAQ match found.`;
-      
+      : `[Demo mode] You asked: "${sanitizedMessage}"\n\nNo close FAQ match found.`;
     return { text: mockAnswer, relatedFaqs };
   }
 
-  // 3. Real AI Mode
-  const systemPreamble = `You are a helpful student support assistant...
---- APPROVED FAQ CONTEXT ---
-${contextBlock}
---- END CONTEXT ---`;
+  const canary = generateCanary();
+  const { systemBlock, hardened } = buildSecurePrompt(sanitizedMessage, contextBlock, canary);
 
   let formattedHistory = [
-    { role: 'user', parts: [{ text: systemPreamble }] }, 
-    { role: 'model', parts: [{ text: 'Understood. I will use the FAQ context when helpful.' }] }
+    { role: 'user', parts: [{ text: systemBlock }] },
+    { role: 'model', parts: [{ text: 'Understood. I will use the FAQ context when helpful and stay within my role.' }] },
   ];
 
   if (Array.isArray(history)) {
     formattedHistory = formattedHistory.concat(
       history.slice(-8).map(h => ({
         role: h.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: h.content }]
+        parts: [{ text: h.content }],
       }))
     );
   }
 
-  // Helper to sanitize history for Gemini schema rules (alternating roles, starting with user, ending with model)
   const sanitizeHistory = (historyArray) => {
     const clean = [];
     for (const msg of historyArray) {
       if (!msg.parts?.[0]?.text) continue;
       if (clean.length > 0 && clean[clean.length - 1].role === msg.role) {
-        // Merge consecutive identical roles to preserve content while respecting schema
         clean[clean.length - 1].parts[0].text += '\n' + msg.parts[0].text;
       } else {
         clean.push({ role: msg.role, parts: [{ text: msg.parts[0].text }] });
       }
     }
-    while (clean.length > 0 && clean[0].role !== 'user') {
-      clean.shift();
-    }
-    while (clean.length > 0 && clean[clean.length - 1].role !== 'model') {
-      clean.pop();
-    }
+    while (clean.length > 0 && clean[0].role !== 'user') clean.shift();
+    while (clean.length > 0 && clean[clean.length - 1].role !== 'model') clean.pop();
     return clean;
   };
 
@@ -72,14 +67,18 @@ ${contextBlock}
 
   const chat = model.startChat({
     history: formattedHistory,
-    generationConfig: { maxOutputTokens: 1200 }
+    generationConfig: { maxOutputTokens: 1200 },
   });
 
-  const result = await chat.sendMessage(message);
-  return {
-    text: (await result.response).text(),
-    relatedFaqs
-  };
+  const result = await chat.sendMessage(hardened);
+  const rawText = (await result.response).text();
+
+  const outputCheck = validateOutput(rawText, canary, systemBlock);
+  if (outputCheck.blocked) {
+    return { text: outputCheck.fallback, relatedFaqs, blocked: true };
+  }
+
+  return { text: rawText, relatedFaqs };
 };
 
 module.exports = { generateResponse };

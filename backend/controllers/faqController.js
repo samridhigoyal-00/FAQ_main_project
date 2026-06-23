@@ -119,9 +119,8 @@ const chatWithAI = async (req, res, next) => {
     // 2. Call AI — if this throws, the counter is never incremented
     const aiResult = await aiService.generateResponse(message, history);
 
-    // 3. Only charge usage after a successful response
     const updated = await incrementAIUsage(String(req.user.id));
-    res.json({ text: aiResult.text, relatedFaqs: aiResult.relatedFaqs, remaining: updated.remaining, limit: updated.limit });
+    res.json({ text: aiResult.text, relatedFaqs: aiResult.relatedFaqs, remaining: updated.remaining, limit: updated.limit, blocked: aiResult.blocked || false });
   } catch (err) { next(err); }
 };
 
